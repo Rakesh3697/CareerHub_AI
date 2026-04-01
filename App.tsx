@@ -17,8 +17,19 @@ import CareerSearch from './pages/CareerSearch';
 import MockInterview from './pages/MockInterview';
 import Feedback from './components/Feedback';
 
+// Menu Icon
+const MenuIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+);
+
+// Close Icon
+const CloseIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+);
+
 export default function App() {
   const [showFeedback, setShowFeedback] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activePage, setActivePage] = useState('dashboard');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -78,11 +89,31 @@ export default function App() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* Mobile Menu Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-indigo-900 text-white flex flex-col flex-shrink-0">
+      <aside className={`fixed md:relative w-64 bg-indigo-900 text-white flex flex-col flex-shrink-0 z-50 h-full transition-transform duration-300 transform ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
         <div className="p-6">
-          <h1 className="text-2xl font-bold tracking-tight">Career Hub AI</h1>
-          <p className="text-indigo-300 text-xs mt-1">Elevate your career</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Career Hub AI</h1>
+              <p className="text-indigo-300 text-xs mt-1">Elevate your career</p>
+            </div>
+            <button 
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden p-1 text-indigo-200 hover:text-white"
+            >
+              <CloseIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
         
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
@@ -91,7 +122,10 @@ export default function App() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActivePage(item.id)}
+                onClick={() => {
+                  setActivePage(item.id);
+                  setSidebarOpen(false);
+                }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
                   activePage === item.id 
                     ? 'bg-indigo-700 text-white shadow-lg' 
@@ -126,9 +160,24 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-slate-50 p-8">
+      <main className="flex-1 overflow-y-auto bg-slate-50 w-full md:w-auto">
+        {/* Mobile Header with Menu Button */}
+        <div className="md:hidden sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-start gap-3 z-30">
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition flex-shrink-0"
+          >
+            {sidebarOpen ? (
+              <CloseIcon className="w-6 h-6" />
+            ) : (
+              <MenuIcon className="w-6 h-6" />
+            )}
+          </button>
+          <h2 className="text-lg font-bold text-slate-800">Career Hub AI</h2>
+        </div>
+
         {showFeedback && <Feedback onClose={() => setShowFeedback(false)} />}
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto p-4 md:p-8">
           {activePage === 'dashboard' && <Dashboard jobs={jobs} studyPlans={studyPlans} />}
           {activePage === 'jobTracker' && <JobTracker jobs={jobs} onRefresh={refreshData} />}
           {activePage === 'resumeFolder' && <ResumeFolder resumes={resumes} onRefresh={refreshData} />}
