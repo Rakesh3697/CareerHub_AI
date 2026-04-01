@@ -1,0 +1,5 @@
+{
+  "name": "Career Hub AI",
+  "description": "A comprehensive AI-powered career management platform featuring a job tracker, resume analyzer, cold email generator, and personalized study plan creator using Google Gemini.",
+  "requestFramePermissions": []
+}
